@@ -1,0 +1,60 @@
+#!/bin/env bash
+
+dir=$(pwd)
+list=$(ls -a)
+mkv=$(echo ${list} | grep .mkv)
+mp4=$(echo ${list} | grep .mp4)
+flv=$(echo ${list} | grep .flv)
+avi=$(echo ${list} | grep .avi)
+
+echo "Are you sure you want to run vconvert in $dir (y/n)?"
+
+read answerDir
+
+if [[ $answerDir != y ]]
+then
+    exit 1
+fi
+
+if [[ -z "${mkv}" ]] && [[ -z "${mp4}" ]] && [[ -z "${flv}" ]] && [[ -z "${avi}" ]]
+then
+    echo No video files found, exiting
+    notify-send "vconvert: No video files found"
+    exit 0
+fi
+
+if [[ -d "./converted" ]]
+then
+    echo Directory already exists, skipping...
+else mkdir converted
+fi
+
+if [ -z "${mkv}" ]
+then
+    echo No mkv files found, skipping...
+else
+    for file in *.mkv; do ffmpeg -i "$file" -c:v dnxhd -profile:v dnxhr_hq -pix_fmt yuv422p -c:a pcm_s16le -f mov "converted/${file%.mkv}".mov; done
+fi
+
+if [ -z "${mp4}" ]
+then
+    echo No mp4 files found, skipping...
+else
+    for file in *.mp4; do ffmpeg -i "$file" -c:v dnxhd -profile:v dnxhr_hq -pix_fmt yuv422p -c:a pcm_s16le -f mov "converted/${file%.mp4}".mov; done
+fi
+
+if [ -z "${flv}" ]
+then
+    echo No flv files found, skipping...
+else
+    for file in *.flv; do ffmpeg -i "$file" -c:v dnxhd -profile:v dnxhr_hq -pix_fmt yuv422p -c:a pcm_s16le -f mov "converted/${file%.flv}".mov; done
+fi
+
+if [ -z "${avi}" ]
+then
+    echo No avi files found, skipping...
+else
+    for file in *.avi; do ffmpeg -i "$file" -c:v dnxhd -profile:v dnxhr_hq -pix_fmt yuv422p -c:a pcm_s16le -f mov "converted/${file%.avi}".mov; done
+fi
+
+notify-send "vconvert: Video converted and ready for editing"
